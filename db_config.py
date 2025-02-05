@@ -1,36 +1,20 @@
-import streamlit as st
 import boto3
+import streamlit as st
 
-# Retrieve AWS credentials from Streamlit Secrets
-AWS_REGION = st.secrets["AWS_REGION"]
-AWS_ACCESS_KEY = st.secrets["AWS_ACCESS_KEY_ID"]
-AWS_SECRET_KEY = st.secrets["AWS_SECRET_ACCESS_KEY"]
+# Load credentials from Streamlit Secrets
+aws_access_key = st.secrets["AWS_ACCESS_KEY_ID"]
+aws_secret_key = st.secrets["AWS_SECRET_ACCESS_KEY"]
+aws_region = st.secrets["AWS_REGION"]
 
-# Initialize DynamoDB Client
-dynamodb_client = boto3.client(
-    "dynamodb",
-    region_name=AWS_REGION,
-    aws_access_key_id=AWS_ACCESS_KEY,
-    aws_secret_access_key=AWS_SECRET_KEY
+# Create a boto3 session
+session = boto3.Session(
+    aws_access_key_id=aws_access_key,
+    aws_secret_access_key=aws_secret_key,
+    region_name=aws_region
 )
 
-# Define the DynamoDB table name
-TABLE_NAME = "Chore_Management"
+dynamodb = session.resource("dynamodb")
+table = dynamodb.Table("Chore_Management")
 
-# Streamlit UI
-st.title("Chore Management")
-
-# Fetch data from DynamoDB
-try:
-    response = dynamodb_client.scan(TableName=TABLE_NAME)
-    chores = response.get("Items", [])
-    
-    if chores:
-        st.write("### Chore List")
-        for chore in chores:
-            st.write(f"- **{chore['chore_name']['S']}** (Assigned to: {chore['assigned_to']['S']})")
-    else:
-        st.write("No chores found.")
-
-except Exception as e:
-    st.error(f"Error fetching chores: {e}")
+response = table.scan()
+print(response)
