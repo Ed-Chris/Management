@@ -25,8 +25,16 @@ df = pd.DataFrame(chores)
 
 # 🔹 **Handle missing or incorrect date formats**
 date_columns = ["start_date", "end_date", "done_date"]
+
 for col in date_columns:
-    df[col] = pd.to_datetime(df[col], errors="coerce")  # Automatically handles missing/invalid values
+    # Convert strings to datetime with explicit format
+    df[col] = pd.to_datetime(df[col], format="%d-%m-%Y", errors="coerce", dayfirst=True)
+
+    # Handle UNIX timestamps (if any)
+    df[col] = pd.to_datetime(df[col], unit="s", errors="coerce").fillna(df[col])
+
+# 🔹 **Debugging: Check missing values**
+#st.write(f"Missing start_date count: {df['start_date'].isna().sum()}")
 
 # 🔹 **Sort by `start_date`**
 df = df.sort_values(by="start_date", ascending=True)
