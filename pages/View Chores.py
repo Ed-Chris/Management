@@ -1,15 +1,18 @@
 import streamlit as st
-import boto3
 import pandas as pd
 from st_aggrid import AgGrid, GridOptionsBuilder
+from db_config import get_dynamodb_table
 
-# AWS DynamoDB setup
-dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
-table = dynamodb.Table("Chore_Management")
+# 🔹 **Get DynamoDB Table**
+table = get_dynamodb_table()
 
-# Fetch all chores from DynamoDB
-response = table.scan()
-chores = response.get("Items", [])
+# 🔹 **Fetch all chores from DynamoDB**
+try:
+    response = table.scan()
+    chores = response.get("Items", [])
+except Exception as e:
+    st.error(f"⚠️ Error fetching data: {e}")
+    st.stop()
 
 st.title("📅 View Chores")
 
@@ -17,46 +20,48 @@ if not chores:
     st.warning("No chores found in the database.")
     st.stop()
 
-# Convert to DataFrame
+# 🔹 **Convert to DataFrame**
 df = pd.DataFrame(chores)
 
-# Handle missing or incorrect date formats
-for col in ["start_date", "end_date", "done_date"]:
-    df[col] = pd.to_datetime(df[col], dayfirst=True, errors="coerce")
+# 🔹 **Handle missing or incorrect date formats**
+date_columns = ["start_date", "end_date", "done_date"]
+for col in date_columns:
+    df[col] = pd.to_datetime(df[col], errors="coerce")  # Automatically handles missing/invalid values
 
-# Sort by start_date
+# 🔹 **Sort by `start_date`**
 df = df.sort_values(by="start_date", ascending=True)
 
-# Reorder columns for better readability
+# 🔹 **Reorder columns for better readability**
 column_order = ["person", "chore", "start_date", "end_date", "done_date", "status"]
 df = df[column_order]
 
-# Format dates for better display in AgGrid
-for col in ["start_date", "end_date", "done_date"]:
+# 🔹 **Format dates for display in AgGrid**
+for col in date_columns:
     df[col] = df[col].dt.strftime("%Y-%m-%d")  # Convert dates to string format
 
-# Dropdown for selecting a person (Includes "All" option)
+# 🔹 **Dropdown for selecting a person (Includes "All" option)**
 people = sorted(set(df["person"].dropna()))
 people.insert(0, "All")
 selected_person = st.selectbox("👤 Select a Person", people)
 
-# Filter chores based on selection
+# 🔹 **Filter chores based on selection**
 if selected_person != "All":
     df = df[df["person"] == selected_person]
 
 # 📌 **Interactive Table View**
 st.subheader("📝 Chore Details")
 
-# Configure AgGrid
+# 🔹 **Configure AgGrid**
 gb = GridOptionsBuilder.from_dataframe(df)
 gb.configure_pagination()
 gb.configure_side_bar()
 gb.configure_selection("single", use_checkbox=True)
-gb.configure_column("start_date", type=["dateColumnFilter", "customDateTimeFormat"], custom_format_string="yyyy-MM-dd")
-gb.configure_column("end_date", type=["dateColumnFilter", "customDateTimeFormat"], custom_format_string="yyyy-MM-dd")
-gb.configure_column("done_date", type=["dateColumnFilter", "customDateTimeFormat"], custom_format_string="yyyy-MM-dd")
+
+# 🔹 **Format date columns in AgGrid**
+for col in date_columns:
+    gb.configure_column(col, type=["dateColumnFilter", "customDateTimeFormat"], custom_format_string="yyyy-MM-dd")
 
 grid_options = gb.build()
 
-# Display AgGrid table
+# 🔹 **Display AgGrid table**
 AgGrid(df, gridOptions=grid_options)
