@@ -1,43 +1,31 @@
 import streamlit as st
-import pandas as pd
 
-# Data for the first chore schedule (Bins, Kitchen, Common Area)
-data1 = {
-    "Start Date": ["01-10-2024", "08-10-2024", "15-10-2024", "22-10-2024"],
-    "End Date": ["07-10-2024", "14-10-2024", "21-10-2024", "28-10-2024"],
-    "Chore": [
-        "Blue & Green Bins, Cleaning Kitchen and Common Area",
-        "Blue & Green Bins, Cleaning Kitchen and Common Area",
-        "Blue & Green Bins, Cleaning Kitchen and Common Area",
-        "Blue & Green Bins, Cleaning Kitchen and Common Area"
-    ],
-    "Person": [
-        "Yedu & Abhijay",
-        "Gagan, Nidhin & Bhatiyar",
-        "Navneet & Mahweer",
-        "Keshav & Mohammed"
-    ]
-}
+# Set up page configuration
+st.set_page_config(page_title="Chore Management", page_icon="✅", layout="wide")
 
-# Data for the second chore schedule (Top Floor Washroom)
-data2 = {
-    "Start Date": ["01-10-2024", "08-10-2024", "15-10-2024", "22-10-2024", "29-10-2024"],
-    "End Date": ["07-10-2024", "14-10-2024", "21-10-2024", "28-10-2024", "04-11-2024"],
-    "Chore": ["Top Floor Washroom"] * 5,  # Same chore for all rows
-    "Person": ["Yedu", "Bhatiyar", "Navneet", "Mahweer", "Nidhin"]
-}
+# Main Title
+st.title("✅ Chore Management App")
+st.write("Welcome to the Chore Management App! Easily **track, assign, and update chores** to keep everything organized.")
 
-# Create DataFrames
-df1 = pd.DataFrame(data1)
-df2 = pd.DataFrame(data2)
+# Features Section
+st.subheader("📌 Features")
+st.markdown("- 📂 **Upload Chores** from an Excel file.")
+st.markdown("- 📊 **View Chores** assigned to each person.")
+st.markdown("- ✅ **Update Chores** when completed.")
 
-# Streamlit app layout
-st.title("Chore Schedules")
+# Bin Collection Info
+st.subheader("🗑️ Bin Collection Schedule")
+st.info("🟢🔵 **Green & Blue Bins:** Every **Tuesday**")
+st.info("⚫ **Black Bins:** Every **Alternate Wednesday**")
 
-# Section 1: Bins, Kitchen, Common Area
-st.header("Bins, Kitchen, and Common Area Chores")
-st.dataframe(df1)
+# Cleaning Reminder
+st.subheader("🧹 Cleanliness Reminder")
+st.warning("⚠️ **Please clean up after yourself if you make a mess!**")
 
-# Section 2: Top Floor Washroom Chores
-st.header("Top Floor Washroom Chores")
-st.dataframe(df2)
+# Sidebar Navigation
+st.sidebar.title("📌 Navigation")
+st.sidebar.success("Select a page above to continue.")
+
+# Footer
+st.markdown("---")
+st.caption("UNO or counter-strike, come let's play")
